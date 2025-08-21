@@ -28,6 +28,67 @@ hr {
   border-top: 5px double #ffffff;
   margin: 20px 50px;
 }
+
+/* ==== AI Chat Styling ==== */
+#chat-btn {
+  position: fixed;
+  bottom: 500px;
+  right: 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+#chat-box {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 300px;
+  height: 400px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+}
+#chat-header {
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+#chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+#chat-input-area {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+#chat-input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  outline: none;
+}
+#send-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+}
 </style>
 
 <head>
@@ -42,8 +103,6 @@ hr {
   
   <pre><h1 style="font-size: 26px;text-align:center;color:white;font-family:italic;">           GOVERNMENT POLYTECHNIC KALABRAGI</h1></pre>
   
-  
-
   <pre><h1 style="font-size: 22px;text-align:left;color:white;font-family:Georgia;">           Information Sceince & Engeneering Department</h1></pre>
   <hr>
   <marquee style="color:white;font-size: 18px;"><b>SUCCESS IS NOT AN INITIAL,SUCCESS IS A JOURNEY</b></marquee>
@@ -53,12 +112,10 @@ hr {
 <body>
 </hr> 
 
-
-
 <head>
     <meta charset="UTF-8">
     <title>Left Side Navbar</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style1.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -74,7 +131,6 @@ hr {
 
 </body>
 
-
  <center>
   <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE3fHx8ZW58MHx8fHx8"
     style="width: 100%;
@@ -85,7 +141,79 @@ hr {
            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
            border: 3px solid #555;">
 </center>
+
+<!-- ==== AI CHAT BUTTON ==== -->
+<button id="chat-btn">AI</button>
+
+<!-- ==== CHAT BOX ==== -->
+<div id="chat-box">
+  <div id="chat-header">Site Assistant</div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask me anything...">
+    <button id="send-btn">Send</button>
+  </div>
+</div>
+
+<script>
+const API_KEY = "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";
+
+const chatBtn = document.getElementById("chat-btn");
+const chatBox = document.getElementById("chat-box");
+const chatMessages = document.getElementById("chat-messages");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
+
+chatBtn.addEventListener("click", () => {
+  chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+});
+
+async function sendMessage(message) {
+  // show user message
+  let userMsg = document.createElement("div");
+  userMsg.style.color = "blue";
+  userMsg.innerText = "You: " + message;
+  chatMessages.appendChild(userMsg);
+
+  // fetch AI reply
+  let botMsg = document.createElement("div");
+  botMsg.style.color = "green";
+  botMsg.innerText = "AI: ...";
+  chatMessages.appendChild(botMsg);
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1:free",
+        messages: [{ role: "user", content: message }]
+      })
+    });
+
+    const data = await response.json();
+    botMsg.innerText = "AI: " + (data.choices?.[0]?.message?.content || "No response");
+  } catch (err) {
+    botMsg.innerText = "AI: Error fetching response.";
+  }
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+sendBtn.addEventListener("click", () => {
+  let msg = chatInput.value;
+  if(msg.trim() !== ""){
+    sendMessage(msg);
+    chatInput.value = "";
+  }
+});
+</script>
+
 </body>
 </head>
 </html>
-
